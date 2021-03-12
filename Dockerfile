@@ -97,7 +97,8 @@ RUN apk update; \
 
 COPY docker-php-source /usr/local/bin/
 ## 12
-RUN set -eux; \
+RUN chmod +x /usr/local/bin/docker-php-source; \
+  set -eux; \
   apk add --no-cache \
     libmcrypt \
     libpng-dev \
@@ -273,7 +274,8 @@ RUN set -eux; \
 
 COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/
 # sodium was built as a shared module (so that it can be replaced later if so desired), so let's enable it too (https://github.com/docker-library/php/issues/598)
-RUN apk update; \
+RUN chmod +x /usr/local/bin/docker-php-entrypoint; \
+    apk update; \
     docker-php-ext-enable sodium; \
     docker-php-ext-enable mcrypt; \
     docker-php-ext-enable mongodb; \
