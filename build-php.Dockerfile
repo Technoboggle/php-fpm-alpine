@@ -15,7 +15,8 @@ ENV PHPIZE_DEPS \
     re2c
 
 # persistent / runtime deps
-RUN apk add --no-cache \
+RUN apk --no-cache upgrade musl &&\
+    apk add --no-cache \
     ca-certificates \
     curl \
     tar \
