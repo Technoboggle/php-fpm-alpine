@@ -1,4 +1,4 @@
-FROM alpine:3.12.3
+FROM alpine:3.13.2
 MAINTAINER edward.finlayson@btinternet.com
 
 # dependencies required for running "phpize"
@@ -48,16 +48,25 @@ RUN set -eux; \
 # Enable linker optimization (this sorts the hash buckets to improve cache locality, and is non-default)
 # https://github.com/docker-library/php/issues/272
 # -D_LARGEFILE_SOURCE and -D_FILE_OFFSET_BITS=64 (https://www.php.net/manual/en/intro.filesystem.php)
+#ENV PHP_EXTRA_CONFIGURE_ARGS="--enable-fpm --with-fpm-user=www-data --with-fpm-group=www-data --disable-cgi" \
+#    PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64" \
+#    PHP_CPPFLAGS="$PHP_CFLAGS" \
+#    PHP_LDFLAGS="-Wl,-O1 -pie" \
+#    GPG_KEYS="1729F83938DA44E27BA0F4D3DBDB397470D12172 BFDDD28642824F8118EF77909B67A5C12229118F" \
+#    PHP_VERSION="8.0.0" \
+#    PHP_URL="https://www.php.net/distributions/php-8.0.0.tar.xz" \
+#    PHP_ASC_URL="https://www.php.net/distributions/php-8.0.0.tar.xz.asc" \
+#    PHP_SHA256="b5278b3eef584f0c075d15666da4e952fa3859ee509d6b0cc2ed13df13f65ebb"
+
 ENV PHP_EXTRA_CONFIGURE_ARGS="--enable-fpm --with-fpm-user=www-data --with-fpm-group=www-data --disable-cgi" \
     PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64" \
     PHP_CPPFLAGS="$PHP_CFLAGS" \
     PHP_LDFLAGS="-Wl,-O1 -pie" \
     GPG_KEYS="1729F83938DA44E27BA0F4D3DBDB397470D12172 BFDDD28642824F8118EF77909B67A5C12229118F" \
-    PHP_VERSION="8.0.0" \
-    PHP_URL="https://www.php.net/distributions/php-8.0.0.tar.xz" \
-    PHP_ASC_URL="https://www.php.net/distributions/php-8.0.0.tar.xz.asc" \
-    PHP_SHA256="b5278b3eef584f0c075d15666da4e952fa3859ee509d6b0cc2ed13df13f65ebb"
-#RUN apk update
+    PHP_VERSION="8.0.3" \
+    PHP_URL="https://www.php.net/distributions/php-8.0.3.tar.xz" \
+    PHP_ASC_URL="https://www.php.net/distributions/php-8.0.3.tar.xz.asc" \
+    PHP_SHA256="c9816aa9745a9695672951eaff3a35ca5eddcb9cacf87a4f04b9fb1169010251"
 
 RUN apk update; \
   set -eux; \
@@ -87,7 +96,7 @@ RUN apk update; \
   apk del --no-network .fetch-deps
 
 COPY docker-php-source /usr/local/bin/
-
+## 12
 RUN set -eux; \
   apk add --no-cache \
     libmcrypt \
@@ -124,7 +133,8 @@ RUN set -eux; \
     openssl-dev \
     sqlite-dev \
     zlib-dev \
- ; \
+    mlocate \
+; \
   \
   export CFLAGS="$PHP_CFLAGS" \
     CPPFLAGS="$PHP_CPPFLAGS" \
@@ -135,6 +145,7 @@ RUN set -eux; \
   gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)"; \
   ./configure \
     --build="$gnuArch" \
+    --sysconfdir=/usr/local/etc \
     --with-config-file-path="$PHP_INI_DIR" \
     --with-config-file-scan-dir="$PHP_INI_DIR/conf.d" \
     \
@@ -221,6 +232,12 @@ RUN set -eux; \
     ${PHP_EXTRA_CONFIGURE_ARGS:-} \
   ; \
   make -j "$(nproc)"; \
+  CONFFILE="/etc/php-fpm.conf.default"; \
+  if [ -f "$CONFFILE" ]; then \
+    cp -f "$CONFFILE" /usr/local/etc/; \
+  fi ; \
+#  updatedb; \
+#  locate php-fpm.conf; \
   find -type f -name '*.a' -delete; \
   make install; \
   find /usr/local/bin /usr/local/sbin -type f -perm +0111 -exec strip --strip-all '{}' + || true; \
@@ -249,10 +266,10 @@ RUN set -eux; \
   pecl install xdebug; \
   apk del --no-network .build-deps; \
   \
-  rm -rf /tmp/pear ~/.pearrc; \
-  \
+  rm -rf /tmp/pear ~/.pearrc
+
 # smoke test
-  php --version
+#  php --version
 
 COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/
 # sodium was built as a shared module (so that it can be replaced later if so desired), so let's enable it too (https://github.com/docker-library/php/issues/598)
@@ -271,6 +288,10 @@ WORKDIR /var/www/html
 
 RUN set -eux; \
   cd /usr/local/etc; \
+  CONFFILE="/etc/php-fpm.conf.default"; \
+  if [ -f "$CONFFILE" ]; then \
+    cp -f "$CONFFILE" /usr/local/etc/; \
+  fi ; \
   if [ -d php-fpm.d ]; then \
     # for some reason, upstream's php-fpm.conf.default has "include=NONE/etc/php-fpm.d/*.conf"
     sed 's!=NONE/!=!g' php-fpm.conf.default | tee php-fpm.conf > /dev/null; \
@@ -284,6 +305,7 @@ RUN set -eux; \
       echo 'include=etc/php-fpm.d/*.conf'; \
     } | tee php-fpm.conf; \
   fi; \
+  ls -al /usr/local/etc/php-fpm.d; \
   { \
     echo '[global]'; \
     echo 'error_log = /proc/self/fd/2'; \
