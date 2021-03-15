@@ -20,7 +20,7 @@ ENV PHPIZE_DEPS \
 
 # persistent / runtime deps
 # Step 4/26
-RUN apk add --update --no-cache musl musl-dev \
+RUN apk add --update --no-cache musl>1.2.2_pre2-r0 musl-dev>1.2.2_pre2-r0 \
     ca-certificates \
     curl \
     tar \
