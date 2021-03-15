@@ -1,8 +1,11 @@
+# Step 1/26
 FROM alpine:3.13.2
+# Step 2/26
 MAINTAINER edward.finlayson@btinternet.com
 
 # dependencies required for running "phpize"
 # these get automatically installed and removed by "docker-php-ext-*" (unless they're already installed)
+# Step 3/26
 ENV PHPIZE_DEPS \
     autoconf \
     dpkg-dev dpkg \
@@ -11,12 +14,13 @@ ENV PHPIZE_DEPS \
     gcc \
     libc-dev \
     make \
+    cmake \
     pkgconf \
     re2c
 
 # persistent / runtime deps
-RUN apk --no-cache upgrade musl &&\
-    apk add --no-cache \
+# Step 4/26
+RUN apk add --update --no-cache musl musl-dev \
     ca-certificates \
     curl \
     tar \
@@ -25,6 +29,7 @@ RUN apk --no-cache upgrade musl &&\
     openssl
 
 # ensure www-data user exists
+# Step 5/26
 RUN set -eux; \
   addgroup -g 82 -S www-data; \
   adduser -u 82 -D -S -G www-data www-data
@@ -32,8 +37,9 @@ RUN set -eux; \
 # https://git.alpinelinux.org/aports/tree/main/apache2/apache2.pre-install?h=3.9-stable
 # https://git.alpinelinux.org/aports/tree/main/lighttpd/lighttpd.pre-install?h=3.9-stable
 # https://git.alpinelinux.org/aports/tree/main/nginx/nginx.pre-install?h=3.9-stable
-
+# Step 6/26
 ENV PHP_INI_DIR /usr/local/etc/php
+# Step 7/26
 RUN set -eux; \
   mkdir -p "$PHP_INI_DIR/conf.d"; \
 # allow running as an arbitrary user (https://github.com/docker-library/php/issues/743)
@@ -42,33 +48,33 @@ RUN set -eux; \
   chown www-data:www-data /var/www/html; \
   chmod 777 /var/www/html
 
+# Step 8/26
+ENV PHP_EXTRA_CONFIGURE_ARGS --enable-fpm --with-fpm-user=www-data --with-fpm-group=www-data --disable-cgi
+
 # Apply stack smash protection to functions using local buffers and alloca()
 # Make PHP's main executable position-independent (improves ASLR security mechanism, and has no performance impact on x86_64)
 # Enable optimization (-O2)
 # Enable linker optimization (this sorts the hash buckets to improve cache locality, and is non-default)
 # https://github.com/docker-library/php/issues/272
 # -D_LARGEFILE_SOURCE and -D_FILE_OFFSET_BITS=64 (https://www.php.net/manual/en/intro.filesystem.php)
-#ENV PHP_EXTRA_CONFIGURE_ARGS="--enable-fpm --with-fpm-user=www-data --with-fpm-group=www-data --disable-cgi" \
-#    PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64" \
-#    PHP_CPPFLAGS="$PHP_CFLAGS" \
-#    PHP_LDFLAGS="-Wl,-O1 -pie" \
-#    GPG_KEYS="1729F83938DA44E27BA0F4D3DBDB397470D12172 BFDDD28642824F8118EF77909B67A5C12229118F" \
-#    PHP_VERSION="8.0.0" \
-#    PHP_URL="https://www.php.net/distributions/php-8.0.0.tar.xz" \
-#    PHP_ASC_URL="https://www.php.net/distributions/php-8.0.0.tar.xz.asc" \
-#    PHP_SHA256="b5278b3eef584f0c075d15666da4e952fa3859ee509d6b0cc2ed13df13f65ebb"
+# Step 9/26
+ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
+# Step 10/26
+ENV PHP_CPPFLAGS="$PHP_CFLAGS"
+# Step 11/26
+ENV PHP_LDFLAGS="-Wl,-O1 -pie"
 
-ENV PHP_EXTRA_CONFIGURE_ARGS="--enable-fpm --with-fpm-user=www-data --with-fpm-group=www-data --disable-cgi" \
-    PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64" \
-    PHP_CPPFLAGS="$PHP_CFLAGS" \
-    PHP_LDFLAGS="-Wl,-O1 -pie" \
-    GPG_KEYS="1729F83938DA44E27BA0F4D3DBDB397470D12172 BFDDD28642824F8118EF77909B67A5C12229118F" \
-    PHP_VERSION="8.0.3" \
-    PHP_URL="https://www.php.net/distributions/php-8.0.3.tar.xz" \
-    PHP_ASC_URL="https://www.php.net/distributions/php-8.0.3.tar.xz.asc" \
-    PHP_SHA256="c9816aa9745a9695672951eaff3a35ca5eddcb9cacf87a4f04b9fb1169010251"
+# Step 12/26
+ENV GPG_KEYS 1729F83938DA44E27BA0F4D3DBDB397470D12172 BFDDD28642824F8118EF77909B67A5C12229118F
 
-RUN apk update; \
+# Step 13/26
+ENV PHP_VERSION 8.0.3
+# Step 14/26
+ENV PHP_URL="https://www.php.net/distributions/php-8.0.3.tar.xz" PHP_ASC_URL="https://www.php.net/distributions/php-8.0.3.tar.xz.asc"
+# Step 15/26
+ENV PHP_SHA256="c9816aa9745a9695672951eaff3a35ca5eddcb9cacf87a4f04b9fb1169010251"
+# Step 16/26
+RUN apk update --no-cache; \
   set -eux; \
   \
   apk add --no-cache --virtual .fetch-deps gnupg; \
@@ -94,30 +100,43 @@ RUN apk update; \
   fi; \
   \
   apk del --no-network .fetch-deps
-
+# Step 17/26
 COPY docker-php-source /usr/local/bin/
-## 12
+# Step 18/26
 RUN chmod +x /usr/local/bin/docker-php-source; \
   set -eux; \
-  apk add --no-cache \
+  apk add --update --no-cache \
     libmcrypt \
     libpng-dev \
     libssh2 \
     libssh2-dev \
     libpng \
+    libbz2 \
     libjpeg-turbo \
-; \
-  apk add --no-cache --virtual .build-deps \
+    libxml2 \
+    libxml2-dev \
+    openssl \
+    openssl-dev \
+    gettext \
+    gettext-dev \
+    gmp-dev \
+    icu \
+    libzip-dev \
+    bzip2 \
+    bzip2-dev \
+    zip \
+    freetype \
+    freetype-dev \
+  ;\
+  \
+  apk add --update --no-cache --virtual .build-deps \
     $PHPIZE_DEPS \
     autoconf \
     argon2-dev \
     aspell-dev \
     bison \
-    bzip2-dev \
     coreutils \
     curl-dev \
-    freetype \
-    freetype-dev \
     jpeg-dev \
     jpeg \
     krb5 \
@@ -125,17 +144,24 @@ RUN chmod +x /usr/local/bin/docker-php-source; \
     libmcrypt-dev \
     libedit-dev \
     libjpeg-turbo-dev\
-    libxml2-dev \
     libressl-dev \
     libsodium-dev \
     libzip-dev \
     linux-headers \
     oniguruma-dev \
-    openssl-dev \
     sqlite-dev \
+    freetds \
+    freetds-dev \
+    icu-dev \
+    imap-dev \
+    libxslt-dev \
+    libgcrypt-dev \
+    libwebp-dev \
+    libxpm-dev \
+    tidyhtml-dev \
     zlib-dev \
     mlocate \
-; \
+  ; \
   \
   export CFLAGS="$PHP_CFLAGS" \
     CPPFLAGS="$PHP_CPPFLAGS" \
@@ -160,7 +186,7 @@ RUN chmod +x /usr/local/bin/docker-php-source; \
     --with-pic \
     \
 # --enable-ftp is included here because ftp_ssl_connect() needs ftp to be compiled statically (see https://github.com/docker-library/php/issues/236)
-    --enable-ftp \
+    --enable-ftp=shared \
 # --enable-mbstring is included here because otherwise there's no way to get pecl to use it properly (see https://github.com/docker-library/php/issues/195)
     --enable-mbstring \
 # --enable-mysqlnd is included here because it's harder to compile after the fact than extensions are (since it's a plugin for several extensions, not an extension in itself)
@@ -173,23 +199,15 @@ RUN chmod +x /usr/local/bin/docker-php-source; \
     --with-pdo-sqlite=/usr \
     --with-sqlite3=/usr \
     \
-    \
-# in PHP 7.4+, the pecl/pear installers are officially deprecated (requiring an explicit "--with-pear")
-# This causes the build process to throw: configure: WARNING: The --with-pear option is deprecated 
-# but his is a non-fatal warning, while deprecated the switch still works.
-    --with-pear \
-    \
     --enable-bcmath \
-    --with-bz2 \
-    --with-curl \
-    --enable-calendar \
-#    --with-freetype-dir=/usr \
-#    --with-png \
-#    --with-xpm-dir=/usr \
-#    --enable-gd-native-ttf \
-#    --with-t1lib=/usr \
-#    --without-gdbm \
-#    --with-gettext \
+    --with-bz2=shared \
+    --with-curl=shared \
+    --enable-calendar=shared \
+    --enable-ctype=shared \
+    --with-freetype \
+    --with-xpm \
+    --without-gdbm \
+    --with-gettext \
     --enable-ftp \
     --enable-gd \
     --with-jpeg \
@@ -205,7 +223,6 @@ RUN chmod +x /usr/local/bin/docker-php-source; \
     --enable-pcntl \
     --enable-phar \
     --with-pspell \
-#    --with-system-tzdata \
     --without-readline \
     --enable-shmop \
     --enable-soap \
@@ -214,18 +231,44 @@ RUN chmod +x /usr/local/bin/docker-php-source; \
     --enable-xmlwriter \
     --with-zip=shared \
     --with-zlib \
-#    --with-gmp=shared \
-#    --enable-dba=shared \
-#    --with-db4=/usr \
-#    --with-gdbm=/usr \
-#    --with-tcadb=/usr \
-#    --with-ldap-sasl \
-#    --with-xsl=shared,/usr \
-#    --enable-json=shared \
-#    --with-mcrypt=shared,/usr \
-#    --with-tidy=shared,/usr \
-#    --with-unixODBC=shared,/usr \
-\
+    \
+# in PHP 7.4+, the pecl/pear installers are officially deprecated (requiring an explicit "--with-pear")
+# This causes the build process to throw: configure: WARNING: The --with-pear option is deprecated 
+# but his is a non-fatal warning, while deprecated the switch still works.
+    --with-pear \
+    --with-gmp=shared \
+    --enable-dom \
+    --enable-fileinfo=shared \
+    --with-imap=shared \
+    --with-imap-ssl \
+    --with-ldap-sasl \
+    --with-xsl=shared,/usr \
+    --with-tidy=shared,/usr \
+    \
+    \
+    --with-system-ciphers \
+    --enable-pcntl=shared \
+    --with-pdo-sqlite=shared,/usr \
+    --enable-posix=shared \
+    --with-pspell=shared \
+    --without-readline \
+    --enable-session \
+    --enable-shmop=shared \
+    --enable-simplexml=shared \
+    --enable-soap=shared \
+    --enable-sockets=shared \
+    --with-sqlite3=shared,/usr \
+    --enable-sysvmsg=shared \
+    --enable-sysvsem=shared \
+    --enable-sysvshm=shared \
+    --with-tidy=shared \
+    --enable-tokenizer=shared \
+    --with-zlib \
+    --with-zlib-dir=/usr \
+    --enable-fpm \
+    --enable-embed \
+##    --with-litespeed build_alias=x86_64-alpine-linux-musl host_alias=x86_64-alpine-linux-musl \
+    \
 # bundled pcre does not support JIT on s390x
 # https://manpages.debian.org/stretch/libpcre3-dev/pcrejit.3.en.html#AVAILABILITY_OF_JIT_SUPPORT
     $(test "$gnuArch" = 's390x-linux-musl' && echo '--without-pcre-jit') \
@@ -237,11 +280,23 @@ RUN chmod +x /usr/local/bin/docker-php-source; \
   if [ -f "$CONFFILE" ]; then \
     cp -f "$CONFFILE" /usr/local/etc/; \
   fi ; \
-#  updatedb; \
-#  locate php-fpm.conf; \
   find -type f -name '*.a' -delete; \
   make install; \
+  \
+  echo ""; \
+  echo ""; \
+  echo "[ ###################################### 303 ]"; \
+  echo ""; \
+  echo ""; \
+  \
   find /usr/local/bin /usr/local/sbin -type f -perm +0111 -exec strip --strip-all '{}' + || true; \
+  \
+  echo ""; \
+  echo ""; \
+  echo "[ ###################################### 311 ]"; \
+  echo ""; \
+  echo ""; \
+  \
   make clean; \
   \
 # https://github.com/docker-library/php/issues/692 (copy default example "php.ini" files somewhere easily discoverable)
@@ -257,7 +312,6 @@ RUN chmod +x /usr/local/bin/docker-php-source; \
       | awk 'system("[ -e /usr/local/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
   )"; \
   apk add --no-cache $runDeps; \
-  \
 # update pecl channel definitions https://github.com/docker-library/php/issues/443
   pecl update-channels; \
   pecl install mcrypt; \
@@ -265,37 +319,37 @@ RUN chmod +x /usr/local/bin/docker-php-source; \
   pecl install redis; \
 #  pecl install -f ssh2-1.2; \
   pecl install xdebug; \
+  \
   apk del --no-network .build-deps; \
   \
-  rm -rf /tmp/pear ~/.pearrc
+  rm -rf /tmp/pear ~/.pearrc;
 
 # smoke test
 #  php --version
 
+# Step 19/26
 COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/
+
 # sodium was built as a shared module (so that it can be replaced later if so desired), so let's enable it too (https://github.com/docker-library/php/issues/598)
+# Step 20/26
 RUN chmod +x /usr/local/bin/docker-php-entrypoint; \
     chmod +x /usr/local/bin/docker-php-ext*; \
     apk add --no-cache bash; \
-    apk update; \
-    docker-php-ext-enable sodium; \
-    docker-php-ext-enable mcrypt; \
-    docker-php-ext-enable mongodb; \
-    docker-php-ext-install opcache; \
-    docker-php-ext-enable redis; \
-#    docker-php-ext-enable ssh2; \
-    docker-php-ext-enable xdebug; \
-    docker-php-ext-enable zip
+    docker-php-ext-install bz2 opcache mysqli pdo pdo_mysql xml; \
+    docker-php-ext-enable sodium mcrypt mongodb zip redis xdebug;
 
+# Step 21/26
 ENTRYPOINT ["docker-php-entrypoint"]
+# Step 21/26
 WORKDIR /var/www/html
 
+# Step 23/26
 RUN set -eux; \
   cd /usr/local/etc; \
-  CONFFILE="/etc/php-fpm.conf.default"; \
-  if [ -f "$CONFFILE" ]; then \
-    cp -f "$CONFFILE" /usr/local/etc/; \
-  fi ; \
+#  CONFFILE="/etc/php-fpm.conf.default"; \
+#  if [ -f "$CONFFILE" ]; then \
+#    cp -f "$CONFFILE" /usr/local/etc/; \
+#  fi ; \
   if [ -d php-fpm.d ]; then \
     # for some reason, upstream's php-fpm.conf.default has "include=NONE/etc/php-fpm.d/*.conf"
     sed 's!=NONE/!=!g' php-fpm.conf.default | tee php-fpm.conf > /dev/null; \
@@ -309,7 +363,6 @@ RUN set -eux; \
       echo 'include=etc/php-fpm.d/*.conf'; \
     } | tee php-fpm.conf; \
   fi; \
-  ls -al /usr/local/etc/php-fpm.d; \
   { \
     echo '[global]'; \
     echo 'error_log = /proc/self/fd/2'; \
@@ -335,7 +388,10 @@ RUN set -eux; \
 
 # Override stop signal to stop process gracefully
 # https://github.com/php/php-src/blob/17baa87faddc2550def3ae7314236826bc1b1398/sapi/fpm/php-fpm.8.in#L163
+# Step 24/26
 STOPSIGNAL SIGQUIT
 
+# Step 25/26
 EXPOSE 9000
+# Step 16/26
 CMD ["php-fpm"]
