@@ -44,9 +44,9 @@ RUN set -eux; \
   mkdir -p "$PHP_INI_DIR/conf.d"; \
 # allow running as an arbitrary user (https://github.com/docker-library/php/issues/743)
   [ ! -d /var/www/html ]; \
-  mkdir -p /var/www/html; \
-  chown www-data:www-data /var/www/html; \
-  chmod 777 /var/www/html
+  mkdir -p /srv/www; \
+  chown www-data:www-data /srv/www; \
+  chmod 777 /srv/www
 
 # Step 8/26
 ENV PHP_EXTRA_CONFIGURE_ARGS --enable-fpm --with-fpm-user=www-data --with-fpm-group=www-data --disable-cgi
@@ -255,7 +255,6 @@ RUN chmod +x /usr/local/bin/docker-php-source; \
     --enable-session \
     --enable-shmop=shared \
     --enable-simplexml=shared \
-    --enable-soap=shared \
     --enable-sockets=shared \
     --with-sqlite3=shared,/usr \
     --enable-sysvmsg=shared \
@@ -335,8 +334,8 @@ COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-php-entrypoint; \
     chmod +x /usr/local/bin/docker-php-ext*; \
     apk add --no-cache bash; \
-    docker-php-ext-install bz2 opcache mysqli pdo pdo_mysql xml; \
-    docker-php-ext-enable sodium mcrypt mongodb zip redis xdebug;
+    docker-php-ext-install bz2 opcache mysqli pdo pdo_mysql soap xml; \
+    docker-php-ext-enable sodium mcrypt mongodb zip redis xdebug xml soap;
 
 # Step 21/26
 ENTRYPOINT ["docker-php-entrypoint"]
