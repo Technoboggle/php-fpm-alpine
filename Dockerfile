@@ -23,16 +23,25 @@ ENV PHPIZE_DEPS \
 RUN apk add --update --no-cache musl>1.2.2_pre2-r0 musl-dev>1.2.2_pre2-r0 \
     ca-certificates \
     curl \
+    shadow \
     tar \
     xz \
 # https://github.com/docker-library/php/issues/494
     openssl
 
+# User credentials nginx to run as
+ENV USER_ID=82 \
+    GROUP_ID=82 \
+    USER_NAME=www-data \
+    GROUP_NAME=www-data
+
 # ensure www-data user exists
 # Step 5/26
 RUN set -eux; \
-  addgroup -g 82 -S www-data; \
-  adduser -u 82 -D -S -G www-data www-data
+#  addgroup -g 82 -S www-data; \
+#  adduser -u 82 -D -S -G www-data www-data
+  groupadd -r -g "$GROUP_ID" "$GROUP_NAME" && \
+  useradd -r -u "$USER_ID" -g "$GROUP_ID" -c "$GROUP_NAME" -d /srv/www -s /sbin/nologin "$USER_NAME"
 # 82 is the standard uid/gid for "www-data" in Alpine
 # https://git.alpinelinux.org/aports/tree/main/apache2/apache2.pre-install?h=3.9-stable
 # https://git.alpinelinux.org/aports/tree/main/lighttpd/lighttpd.pre-install?h=3.9-stable
@@ -43,13 +52,13 @@ ENV PHP_INI_DIR /usr/local/etc/php
 RUN set -eux; \
   mkdir -p "$PHP_INI_DIR/conf.d"; \
 # allow running as an arbitrary user (https://github.com/docker-library/php/issues/743)
-  [ ! -d /var/www/html ]; \
+  [ ! -d /srv/www ]; \
   mkdir -p /srv/www; \
   chown www-data:www-data /srv/www; \
   chmod 777 /srv/www
 
 # Step 8/26
-ENV PHP_EXTRA_CONFIGURE_ARGS --enable-fpm --with-fpm-user=www-data --with-fpm-group=www-data --disable-cgi
+ENV PHP_EXTRA_CONFIGURE_ARGS --enable-fpm --with-fpm-user="$USER_NAME" --with-fpm-group="$GROUP_NAME" --disable-cgi
 
 # Apply stack smash protection to functions using local buffers and alloca()
 # Make PHP's main executable position-independent (improves ASLR security mechanism, and has no performance impact on x86_64)
@@ -340,7 +349,7 @@ RUN chmod +x /usr/local/bin/docker-php-entrypoint; \
 # Step 21/26
 ENTRYPOINT ["docker-php-entrypoint"]
 # Step 21/26
-WORKDIR /var/www/html
+WORKDIR /srv/www
 
 # Step 23/26
 RUN set -eux; \
