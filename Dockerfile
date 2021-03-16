@@ -324,7 +324,7 @@ RUN chmod +x /usr/local/bin/docker-php-source; \
   pecl update-channels; \
   pecl install mcrypt; \
   pecl install mongodb; \
-  pecl install redis; \
+  pecl install -o -f redis; \
 #  pecl install -f ssh2-1.2; \
   pecl install xdebug; \
   \
@@ -344,7 +344,7 @@ RUN chmod +x /usr/local/bin/docker-php-entrypoint; \
     chmod +x /usr/local/bin/docker-php-ext*; \
     apk add --no-cache bash; \
     docker-php-ext-install bz2 opcache mysqli pdo pdo_mysql soap xml; \
-    docker-php-ext-enable sodium mcrypt mongodb zip redis xdebug xml soap;
+    docker-php-ext-enable sodium mcrypt mongodb zip redis.so xdebug xml soap;
 
 # Step 21/26
 ENTRYPOINT ["docker-php-entrypoint"]
