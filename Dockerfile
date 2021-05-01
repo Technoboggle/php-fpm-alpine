@@ -1,5 +1,5 @@
 # Step 1/26
-FROM alpine:3.13.2
+FROM alpine:3.13.5
 # Step 2/26
 MAINTAINER edward.finlayson@btinternet.com
 
@@ -79,9 +79,9 @@ ENV GPG_KEYS 1729F83938DA44E27BA0F4D3DBDB397470D12172 BFDDD28642824F8118EF77909B
 # Step 13/26
 ENV PHP_VERSION 8.0.3
 # Step 14/26
-ENV PHP_URL="https://www.php.net/distributions/php-8.0.3.tar.xz" PHP_ASC_URL="https://www.php.net/distributions/php-8.0.3.tar.xz.asc"
+ENV PHP_URL="https://www.php.net/distributions/php-8.0.5.tar.xz" PHP_ASC_URL="https://www.php.net/distributions/php-8.0.5.tar.xz.asc"
 # Step 15/26
-ENV PHP_SHA256="c9816aa9745a9695672951eaff3a35ca5eddcb9cacf87a4f04b9fb1169010251"
+ENV PHP_SHA256="50aeac6fe9c2b5577d534369392ebb89c3e7a342b20ef538832b1df996cccb2a"
 # Step 16/26
 RUN apk update --no-cache; \
   set -eux; \
