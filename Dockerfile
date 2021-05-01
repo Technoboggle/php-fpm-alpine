@@ -81,7 +81,7 @@ ENV PHP_VERSION 8.0.3
 # Step 14/26
 ENV PHP_URL="https://www.php.net/distributions/php-8.0.5.tar.xz" PHP_ASC_URL="https://www.php.net/distributions/php-8.0.5.tar.xz.asc"
 # Step 15/26
-ENV PHP_SHA256="50aeac6fe9c2b5577d534369392ebb89c3e7a342b20ef538832b1df996cccb2a"
+ENV PHP_SHA256="5dd358b35ecd5890a4f09fb68035a72fe6b45d3ead6999ea95981a107fd1f2ab"
 # Step 16/26
 RUN apk update --no-cache; \
   set -eux; \
