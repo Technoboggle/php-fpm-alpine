@@ -172,6 +172,9 @@ RUN chmod +x /usr/local/bin/docker-php-source; \
     mlocate \
   ; \
   \
+  apk update; \
+  apk add --upgrade libjpeg-turbo libjpeg-turbo-dev; \
+  \
   export CFLAGS="$PHP_CFLAGS" \
     CPPFLAGS="$PHP_CPPFLAGS" \
     LDFLAGS="$PHP_LDFLAGS" \
