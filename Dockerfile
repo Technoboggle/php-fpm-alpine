@@ -1,5 +1,5 @@
 # Step 1/26
-FROM alpine:3
+FROM alpine:latest
 # Step 2/26
 MAINTAINER edward.finlayson@btinternet.com
 
