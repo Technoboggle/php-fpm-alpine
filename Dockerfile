@@ -1,7 +1,12 @@
 # Step 1/26
-FROM alpine:latest
+FROM alpine:3.14.2
 # Step 2/26
 MAINTAINER edward.finlayson@btinternet.com
+LABEL net.technoboggle.authorname="Edward Finlayson" \
+      net.technoboggle.authors="edward.finlayson@btinternet.com" \
+      net.technoboggle.version="0.1" \
+      net.technoboggle.description="This image builds a PHP-fpm server" \
+      net.technoboggle.buildDate=$buildDate
 
 # dependencies required for running "phpize"
 # these get automatically installed and removed by "docker-php-ext-*" (unless they're already installed)
@@ -30,6 +35,7 @@ RUN apk add --update --no-cache musl>1.2.2_pre2-r0 musl-dev>1.2.2_pre2-r0 \
     openssl
 
 # User credentials nginx to run as
+# 82 is the standard uid/gid for "www-data" in Alpine
 ENV USER_ID=82 \
     GROUP_ID=82 \
     USER_NAME=www-data \
@@ -40,14 +46,14 @@ ENV USER_ID=82 \
 RUN set -eux; \
 #  addgroup -g 82 -S www-data; \
 #  adduser -u 82 -D -S -G www-data www-data
+  (deluser "${USER_NAME}" || true) && \
+  (delgroup "${GROUP_NAME}" || true) && \
   groupadd -r -g "$GROUP_ID" "$GROUP_NAME" && \
   useradd -r -u "$USER_ID" -g "$GROUP_ID" -c "$GROUP_NAME" -d /srv/www -s /sbin/nologin "$USER_NAME"
-# 82 is the standard uid/gid for "www-data" in Alpine
-# https://git.alpinelinux.org/aports/tree/main/apache2/apache2.pre-install?h=3.9-stable
-# https://git.alpinelinux.org/aports/tree/main/lighttpd/lighttpd.pre-install?h=3.9-stable
-# https://git.alpinelinux.org/aports/tree/main/nginx/nginx.pre-install?h=3.9-stable
+
 # Step 6/26
 ENV PHP_INI_DIR /usr/local/etc/php
+
 # Step 7/26
 RUN set -eux; \
   mkdir -p "$PHP_INI_DIR/conf.d"; \
@@ -74,14 +80,15 @@ ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -pie"
 
 # Step 12/26
-ENV GPG_KEYS 1729F83938DA44E27BA0F4D3DBDB397470D12172 BFDDD28642824F8118EF77909B67A5C12229118F
+ENV GPG_KEYS 42670A7FE4D0441C8E4632349E4FDC074A4EF02D 5A52880781F755608BF815FC910DEB46F53EA312
+ENV KEY_SERVER hkp://keys.gnupg.net
 
 # Step 13/26
-ENV PHP_VERSION 8.0.3
+ENV PHP_VERSION 7.4.24
 # Step 14/26
-ENV PHP_URL="https://www.php.net/distributions/php-8.0.5.tar.xz" PHP_ASC_URL="https://www.php.net/distributions/php-8.0.5.tar.xz.asc"
+ENV PHP_URL="https://www.php.net/distributions/php-${PHP_VERSION}.tar.xz" PHP_ASC_URL="https://www.php.net/distributions/php-${PHP_VERSION}.tar.xz.asc"
 # Step 15/26
-ENV PHP_SHA256="5dd358b35ecd5890a4f09fb68035a72fe6b45d3ead6999ea95981a107fd1f2ab"
+ENV PHP_SHA256="ff7658ee2f6d8af05b48c21146af5f502e121def4e76e862df5ec9fa06e98734"
 # Step 16/26
 RUN apk update --no-cache; \
   set -eux; \
@@ -101,7 +108,7 @@ RUN apk update --no-cache; \
     curl -fsSL -o php.tar.xz.asc "$PHP_ASC_URL"; \
     export GNUPGHOME="$(mktemp -d)"; \
     for key in $GPG_KEYS; do \
-      gpg --batch --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
+      gpg --batch --keyserver "${KEY_SERVER}" --recv-keys "$key"; \
     done; \
     gpg --batch --verify php.tar.xz.asc php.tar.xz; \
     gpgconf --kill all; \
@@ -109,8 +116,10 @@ RUN apk update --no-cache; \
   fi; \
   \
   apk del --no-network .fetch-deps
+
 # Step 17/26
 COPY docker-php-source /usr/local/bin/
+
 # Step 18/26
 RUN chmod +x /usr/local/bin/docker-php-source; \
   set -eux; \
