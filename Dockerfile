@@ -32,7 +32,8 @@ RUN apk add --update --no-cache musl>1.2.2_pre2-r0 musl-dev>1.2.2_pre2-r0 \
     tar \
     xz \
 # https://github.com/docker-library/php/issues/494
-    openssl
+    openssl&& \
+    apk upgrade --no-cache musl curl libcurl
 
 # User credentials nginx to run as
 # 82 is the standard uid/gid for "www-data" in Alpine
