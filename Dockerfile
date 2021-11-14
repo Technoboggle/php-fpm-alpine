@@ -1,5 +1,5 @@
 # Step 1/26
-FROM alpine:3.14.2
+FROM alpine:3.14
 # Step 2/26
 MAINTAINER edward.finlayson@btinternet.com
 LABEL net.technoboggle.authorname="Edward Finlayson" \
