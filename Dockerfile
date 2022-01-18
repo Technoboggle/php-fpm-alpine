@@ -1,5 +1,5 @@
 # Step 1/26
-FROM alpine:3.14.2
+FROM alpine:3.15.0
 # Step 2/26
 MAINTAINER edward.finlayson@btinternet.com
 LABEL net.technoboggle.authorname="Edward Finlayson" \
@@ -85,11 +85,11 @@ ENV GPG_KEYS 42670A7FE4D0441C8E4632349E4FDC074A4EF02D 5A52880781F755608BF815FC91
 ENV KEY_SERVER hkp://keys.gnupg.net
 
 # Step 13/26
-ENV PHP_VERSION 7.4.24
+ENV PHP_VERSION 7.4.27
 # Step 14/26
 ENV PHP_URL="https://www.php.net/distributions/php-${PHP_VERSION}.tar.xz" PHP_ASC_URL="https://www.php.net/distributions/php-${PHP_VERSION}.tar.xz.asc"
 # Step 15/26
-ENV PHP_SHA256="ff7658ee2f6d8af05b48c21146af5f502e121def4e76e862df5ec9fa06e98734"
+ENV PHP_SHA256="3f8b937310f155822752229c2c2feb8cc2621e25a728e7b94d0d74c128c43d0c"
 # Step 16/26
 RUN apk update --no-cache; \
   set -eux; \
