@@ -18,13 +18,20 @@ chmod 0777 docker-php-ext-enable
 chmod 0777 docker-php-ext-install
 chmod 0777 docker-php-source
 
-docker build -f Dockerfile -t technoboggle/php-fpm-alpine:7.4.27-3.15.0 --build-arg buildDate=$(date +'%Y-%m-%d') --no-cache --progress=plain .
-docker run -it -d -p 8000:80 --rm --name myphp-fpm technoboggle/php-fpm-alpine:7.4.27-3.15.0
-docker tag technoboggle/php-fpm-alpine:7.4.27-3.15.0 technoboggle/php-fpm-alpine:7.4.27-3.15.0
-docker tag technoboggle/php-fpm-alpine:7.4.27-3.15.0 technoboggle/php-fpm-alpine:latest
+# Get extenstion installer if missing ot not recent version
+curl -sSLf -o install-php-extensions https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions
+chmod +x install-php-extensions
+
+
+#continueing with build
+docker build -f Dockerfile -t technoboggle/php-fpm-alpine:7.4.28-3.15 --build-arg buildDate=$(date +'%Y-%m-%d') --no-cache --progress=plain .
+docker run -it -d -p 8000:80 --rm --name myphp-fpm technoboggle/php-fpm-alpine:7.4.28-3.15
+docker tag technoboggle/php-fpm-alpine:7.4.28-3.15 technoboggle/php-fpm-alpine:7.4.28-3.15
+docker tag technoboggle/php-fpm-alpine:7.4.28-3.15 technoboggle/php-fpm-alpine:latest
 docker login
-docker push technoboggle/php-fpm-alpine:7.4.27-3.15.0
+docker push technoboggle/php-fpm-alpine:7.4.28-3.15
 docker push technoboggle/php-fpm-alpine:latest
 docker container stop -t 10 myphp-fpm
 #####################################################################
 ```
+docker image prune --filter label=stage=builder
