@@ -1,4 +1,4 @@
-FROM php:7.4.28-fpm-alpine3.15
+FROM php:7.4-fpm-alpine3.15
 
 
 MAINTAINER edward.finlayson@btinternet.com
