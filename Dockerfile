@@ -1,7 +1,7 @@
-FROM php:7.4.28-fpm-alpine3.15
+FROM php:8.1.8-fpm-alpine3.15
 
 
-MAINTAINER edward.finlayson@btinternet.com
+LABEL maintainer="edward.finlayson@btinternet.com"
 LABEL net.technoboggle.authorname="Edward Finlayson" \
      net.technoboggle.authors="edward.finlayson@btinternet.com" \
      net.technoboggle.version="0.1" \
@@ -12,8 +12,8 @@ LABEL net.technoboggle.authorname="Edward Finlayson" \
 COPY ./install-php-extensions /usr/local/bin/
 #ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
 
-RUN apk update
-RUN chmod +x /usr/local/bin/install-php-extensions && \
+RUN apk update && \
+    chmod +x /usr/local/bin/install-php-extensions && \
     install-php-extensions \
         # amqp 
         # apcu \
@@ -52,7 +52,7 @@ RUN chmod +x /usr/local/bin/install-php-extensions && \
         # ioncube_loader \
         # jsmin \
         # json_post \
-        # ldap \
+        ldap \
         # lzf \
         mailparse \
         # maxminddb \
@@ -70,7 +70,7 @@ RUN chmod +x /usr/local/bin/install-php-extensions && \
         # opencensus \
         # openswoole \
         # parallel \
-        # pcntl \
+        pcntl \
         # pcov \
         # pdo_dblib \
         # pdo_firebird \
@@ -110,10 +110,10 @@ RUN chmod +x /usr/local/bin/install-php-extensions && \
         # vips \
         xdebug \
         # xhprof \
-        # xlswriter \
-        # xmldiff \
-        # xmlrpc \
-        # xsl \
+        xlswriter \
+        xmldiff \
+        xmlrpc \
+        xsl \
         # yac \
         yaml \
         # yar \
