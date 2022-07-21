@@ -24,7 +24,13 @@ chmod +x install-php-extensions
 
 
 #continueing with build
-docker build -f Dockerfile -t technoboggle/php-fpm-alpine:7.4.28-3.15 --build-arg buildDate=$(date +'%Y-%m-%d') --no-cache --progress=plain .
+docker build -f Dockerfile -t technoboggle/php-fpm-alpine:8.1.8-3.15 --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') --build-arg VCS_REF=7aa4f4fed2822afd7ae0f083526aaba6ea502ca9 --build-arg BUILD_VERSION=0.05 --no-cache --progress=plain .
+
+in the above pay special attenttion to the values to be updated which are:
+  7aa4f4fed2822afd7ae0f083526aaba6ea502ca9  = git commit SHA key (this can be found with: git rev-parse --verify HEAD )
+  0.05                                      = current version of this image
+
+
 docker run -it -d -p 8000:80 --rm --name myphp-fpm technoboggle/php-fpm-alpine:7.4.28-3.15
 docker tag technoboggle/php-fpm-alpine:7.4.28-3.15 technoboggle/php-fpm-alpine:7.4.28-3.15
 docker tag technoboggle/php-fpm-alpine:7.4.28-3.15 technoboggle/php-fpm-alpine:latest
@@ -35,3 +41,4 @@ docker container stop -t 10 myphp-fpm
 #####################################################################
 ```
 docker image prune --filter label=stage=builder
+

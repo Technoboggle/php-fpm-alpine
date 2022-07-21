@@ -1,12 +1,30 @@
 FROM php:8.1.8-fpm-alpine3.15
 
+# Technoboggle Build time arguments.
+ARG BUILD_DATE
+ARG VCS_REF
+ARG BUILD_VERSION
 
+ENV ALPINE_VERSION 3.15.5
+
+# Labels.
 LABEL maintainer="edward.finlayson@btinternet.com"
 LABEL net.technoboggle.authorname="Edward Finlayson" \
-     net.technoboggle.authors="edward.finlayson@btinternet.com" \
-     net.technoboggle.version="0.1" \
-     net.technoboggle.description="This image builds a PHP-fpm server" \
-     net.technoboggle.buildDate="${BUILD_DATE}"
+      net.technoboggle.authors="edward.finlayson@btinternet.com" \
+      net.technoboggle.version="0.1" \
+      net.technoboggle.description="This image builds a PHP-FPM server on Alpine" \
+      net.technoboggle.buildDate="${BUILD_DATE}"
+
+LABEL org.label-schema.schema-version="1.0"
+LABEL org.label-schema.build-date="${BUILD_DATE}"
+LABEL org.label-schema.name="Technoboggle/php-fpm-alpine"
+LABEL org.label-schema.description="Technoboggle lightweight php-fpm node"
+LABEL org.label-schema.url="http://technoboggle.com/"
+LABEL org.label-schema.vcs-url="https://github.com/Technoboggle/php-fpm"
+LABEL org.label-schema.vcs-ref="$VCS_REF"
+LABEL org.label-schema.vendor="WSO2"
+LABEL org.label-schema.version="$BUILD_VERSION"
+LABEL org.label-schema.docker.cmd="docker run -it -d -p 16379:6379 --rm --name myredis technoboggle/redis-alpine:${REDIS_VERSION}-${ALPINE_VERSION}"
 
 #WORKDIR /app
 COPY ./install-php-extensions /usr/local/bin/
@@ -36,8 +54,8 @@ RUN apk update && \
         # ffi \
         gd \
         # gearman \
-        geoip \
-        geospatial \
+        # geoip \
+        # geospatial \
         gettext \
         # gmagick \
         # gmp \
@@ -61,7 +79,7 @@ RUN apk update && \
         memcached \
         mongodb \
         # mosquitto \
-        # msgpack \
+        msgpack \
         mysqli \
         oauth \
         # oci8 \
@@ -105,10 +123,10 @@ RUN apk update && \
         tidy \
         timezonedb \
         # uopz \
-        # uploadprogress \
+        uploadprogress \
         uuid \
         # vips \
-        xdebug \
+        xdebug-3.1.5 \
         # xhprof \
         xlswriter \
         xmldiff \
@@ -118,10 +136,10 @@ RUN apk update && \
         yaml \
         # yar \
         # zephir_parser \
-        zip \
+        zip
         # zookeeper \
         # zstd
-        && ls -al /usr/local/lib/php/extensions/no-debug-non-zts-20190902/
+RUN     ls -al /usr/local/lib/php/extensions/no-debug-non-zts-20210902/
 
 EXPOSE 9000
 CMD ["php-fpm"]
