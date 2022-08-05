@@ -1,11 +1,12 @@
-FROM php:8.1.8-fpm-alpine3.15
+FROM php:8.1.8-fpm-alpine3.16
 
 # Technoboggle Build time arguments.
 ARG BUILD_DATE
 ARG VCS_REF
 ARG BUILD_VERSION
 
-ENV ALPINE_VERSION 3.15.5
+ENV ALPINE_VERSION 3.16
+ENV PHPFPM_VERSION 8.1.8
 
 # Labels.
 LABEL maintainer="edward.finlayson@btinternet.com"
@@ -24,7 +25,7 @@ LABEL org.label-schema.vcs-url="https://github.com/Technoboggle/php-fpm"
 LABEL org.label-schema.vcs-ref="$VCS_REF"
 LABEL org.label-schema.vendor="WSO2"
 LABEL org.label-schema.version="$BUILD_VERSION"
-LABEL org.label-schema.docker.cmd="docker run -it -d -p 16379:6379 --rm --name myredis technoboggle/redis-alpine:${REDIS_VERSION}-${ALPINE_VERSION}"
+LABEL org.label-schema.docker.cmd="docker run -it -d -p 16379:6379 --rm --name myredis technoboggle/php-fpm-alpine:${PHPFPM_VERSION}-${ALPINE_VERSION}"
 
 #WORKDIR /app
 COPY ./install-php-extensions /usr/local/bin/
