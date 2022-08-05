@@ -42,3 +42,4 @@ docker container stop -t 10 myphp-fpm
 ```
 docker image prune --filter label=stage=builder
 
+deprecated the use of the :latest tag as it seeds confusion

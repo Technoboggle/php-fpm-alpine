@@ -27,10 +27,10 @@ docker build -f Dockerfile -t technoboggle/php-fpm-alpine:"$phpfpm_ver-$alpine_v
 #--progress=plain 
 
 docker run -it -d --rm -p 9000:9000 --name myphp technoboggle/php-fpm-alpine:"$phpfpm_ver-$alpine_ver"
-docker tag technoboggle/php-fpm-alpine:"$phpfpm_ver-$alpine_ver" technoboggle/php-fpm-alpine:latest
+#docker tag technoboggle/php-fpm-alpine:"$phpfpm_ver-$alpine_ver" technoboggle/php-fpm-alpine:latest
 docker login
 docker push technoboggle/php-fpm-alpine:"$phpfpm_ver-$alpine_ver"
-docker push technoboggle/php-fpm-alpine:latest
-#docker container stop -t 10 myphp
+#docker push technoboggle/php-fpm-alpine:latest
+docker container stop -t 10 myphp
 
 cd "$owd"
