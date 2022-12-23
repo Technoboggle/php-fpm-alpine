@@ -1,12 +1,12 @@
-FROM php:8.1.8-fpm-alpine3.16
+FROM php:8.2-fpm-alpine3.17
 
 # Technoboggle Build time arguments.
 ARG BUILD_DATE
 ARG VCS_REF
 ARG BUILD_VERSION
 
-ENV ALPINE_VERSION 3.16
-ENV PHPFPM_VERSION 8.1.8
+ENV ALPINE_VERSION 3.17.0
+ENV PHPFPM_VERSION 8.2
 
 # Labels.
 LABEL maintainer="edward.finlayson@btinternet.com"
@@ -127,7 +127,7 @@ RUN apk update && \
         uploadprogress \
         uuid \
         # vips \
-        xdebug-3.1.5 \
+        xdebug-3.2.0 \
         # xhprof \
         xlswriter \
         xmldiff \
@@ -140,7 +140,6 @@ RUN apk update && \
         zip
         # zookeeper \
         # zstd
-RUN     ls -al /usr/local/lib/php/extensions/no-debug-non-zts-20210902/
 
 EXPOSE 9000
 CMD ["php-fpm"]

@@ -3,8 +3,8 @@
 owd="`pwd`"
 cd "$(dirname "$0")"
 
-phpfpm_ver="8.1.8"
-alpine_ver="3.16.1"
+phpfpm_ver="8.2"
+alpine_ver="3.17.0"
 
 # Setting File permissions
 xattr -c .git
