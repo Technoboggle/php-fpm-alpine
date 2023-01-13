@@ -1,12 +1,12 @@
-FROM php:8.2-fpm-alpine3.17
+FROM php:8.2.1-fpm-alpine3.17
 
 # Technoboggle Build time arguments.
 ARG BUILD_DATE
 ARG VCS_REF
 ARG BUILD_VERSION
 
-ENV ALPINE_VERSION 3.17.0
-ENV PHPFPM_VERSION 8.2
+ENV ALPINE_VERSION 3.17
+ENV PHPFPM_VERSION 8.2.1
 
 # Labels.
 LABEL maintainer="edward.finlayson@btinternet.com"
@@ -31,7 +31,9 @@ LABEL org.label-schema.docker.cmd="docker run -it -d -p 16379:6379 --rm --name m
 COPY ./install-php-extensions /usr/local/bin/
 #ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
 
-RUN apk update && \
+RUN apk add --upgrade curl libcurl && \
+    apk update && \
+    chmod +x /usr/local/bin/install-php-extensions && \
     chmod +x /usr/local/bin/install-php-extensions && \
     install-php-extensions \
         # amqp 
