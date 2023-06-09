@@ -1,4 +1,4 @@
-FROM php:8.2.1-fpm-alpine3.17
+FROM php:8-fpm-alpine3.17
 
 # Technoboggle Build time arguments.
 ARG BUILD_DATE
