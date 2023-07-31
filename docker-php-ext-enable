@@ -11,7 +11,7 @@ usage() {
 	echo "       $0 --ini-name 0-apc.ini apcu apc"
 	echo
 	echo 'Possible values for module-name:'
-	find -maxdepth 1 \
+	find . -maxdepth 1 \
 			-type f \
 			-name '*.so' \
 			-exec basename '{}' ';' \

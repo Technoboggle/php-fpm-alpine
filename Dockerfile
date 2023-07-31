@@ -1,12 +1,12 @@
-FROM php:8.2.1-fpm-alpine3.17
+FROM php:8.2.8-fpm-alpine3.18
 
 # Technoboggle Build time arguments.
 ARG BUILD_DATE
 ARG VCS_REF
 ARG BUILD_VERSION
 
-ENV ALPINE_VERSION 3.17
-ENV PHPFPM_VERSION 8.2.1
+ENV ALPINE_VERSION 3.18
+ENV PHPFPM_VERSION 8.2.8
 
 # Labels.
 LABEL maintainer="edward.finlayson@btinternet.com"
@@ -36,7 +36,7 @@ RUN apk add --upgrade curl libcurl && \
     chmod +x /usr/local/bin/install-php-extensions && \
     chmod +x /usr/local/bin/install-php-extensions && \
     install-php-extensions \
-        # amqp 
+        # amqp
         # apcu \
         # apcu_bc \
         # ast \
