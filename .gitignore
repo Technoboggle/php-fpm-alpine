@@ -89,3 +89,6 @@ GitHub.sublime-settings
 
 # Exclude the module installation script so that we have to fetch the latest version when building
 install-php-extensions
+
+# Exclude the build permissions file
+.perms
