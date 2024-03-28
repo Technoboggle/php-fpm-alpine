@@ -1,0 +1,42 @@
+#!/bin/bash
+
+#############################################
+#  Build the Docker image - php-fpm-alpine  #
+#                                           #
+#   This script is used to build the image  #
+#   for redis-alpine, by overriding the     #
+#   default values in the Dockerfile, and   #
+#   replacing the default build command     #
+#############################################
+
+if [ -f env.hcl ]; then
+    export $(cat env.hcl | xargs)
+fi
+
+DOCKERCMD='docker run -it -d -p 16379:6379 --rm --name myphp technoboggle/php-fpm-alpine:'"${PHP_VERSION}-${ALPINE_VERSION}"
+BUILD_DATE="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+VCS_REF="$SOURCE_COMMIT"
+
+export DOCKERCMD
+export BUILD_DATE
+export VCS_REF
+
+docker build \
+    --build-arg ALPINE_VERSION="$ALPINE_VERSION" \
+    --build-arg PHP_VERSION="$PHP_VERSION" \
+    --build-arg MAINTAINER="$MAINTAINER" \
+    --build-arg AUTHORNAME="$AUTHORNAME" \
+    --build-arg AUTHORS="$AUTHORS" \
+    --build-arg VERSION="$VERSION" \
+    --build-arg SCHEMAVERSION="$SCHEMAVERSION" \
+    --build-arg NAME="$NAME" \
+    --build-arg DESCRIPTION="$DESCRIPTION" \
+    --build-arg URL="$URL" \
+    --build-arg VCS_URL="$VCS_URL" \
+    --build-arg VENDOR="$VENDOR" \
+    --build-arg BUILD_VERSION="$BUILD_VERSION" \
+    --build-arg BUILD_DATE="$BUILD_DATE" \
+    --build-arg VCS_REF="$VCS_REF" \
+    --build-arg DOCKERCMD="$DOCKERCMD" \
+    -t "technoboggle/php-fpm-alpine:BUILD_TEST-DO_NOT_USE" \
+    -f "$DOCKERFILE_PATH" .

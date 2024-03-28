@@ -6,4 +6,24 @@ if [ "${1#-}" != "$1" ]; then
 	set -- php-fpm "$@"
 fi
 
+if [ -e /mnt/conf/www.conf ]; then
+	cp /mnt/conf/www.conf /usr/local/etc/php-fpm.d/www.conf
+fi
+
+if [ -e /mnt/conf/docker.conf ]; then
+	cp /mnt/conf/docker.conf /usr/local/etc/php-fpm.d/docker.conf
+fi
+
+if [ -e /mnt/conf/zz-docker.conf ]; then
+	cp /mnt/conf/zz-docker.conf /usr/local/etc/php-fpm.d/zz-docker.conf
+fi
+
+if [ -e /mnt/conf/php-fpm.conf ]; then
+	cp /mnt/conf/php-fpm.conf /usr/local/etc/php-fpm.conf
+fi
+
+if [ -e /mnt/conf/php.ini-development ]; then
+	cp /mnt/conf/php.ini-development /usr/local/etc/php/php.ini
+fi
+
 exec "$@"
