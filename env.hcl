@@ -1,18 +1,15 @@
 ALPINE_VERSION=3.19
 PHP_VERSION=8.3
-
 MAINTAINER="edward.finlayson@btinternet.com"
 AUTHORNAME="Edward Finlayson"
 AUTHORS="edward.finlayson@btinternet.com"
 VERSION="0.1"
-
 OLD_USER_ID="82"
 NEW_USER_ID="1000"
 OLD_GROUP_ID="82"
 NEW_GROUP_ID="1000"
 USER_NAME="www-data"
 GROUP_NAME="www-data"
-
 SCHEMAVERSION="1.0"
 NAME="Technoboggle/phpmyadmin-alpine"
 DESCRIPTION="Technoboggle lightweight PhpMyAdmin node"
