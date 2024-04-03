@@ -73,6 +73,7 @@ RUN if [ id "82" >/dev/null 2>&1; ]; then deluser --remove-home www-data; if [ $
     libxml2-dev=="2.12.6-r0" \
     libxslt \
     libxml2-utils=="2.12.6-r0" \
+    c-ares=="1.27.0-r0" \
     --repository https://dl-cdn.alpinelinux.org/alpine/edge/main/ \
     --allow-untrusted && \
     # The following add command is an attempt to install curl & libcurl
