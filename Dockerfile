@@ -42,7 +42,16 @@ LABEL org.label-schema.docker.cmd=${DOCKERCMD}
 #WORKDIR /app
 
 # Create the php-fpm user and group with the correct UID and GID to match the host
-RUN if [ id "82" >/dev/null 2>&1; ]; then deluser --remove-home www-data; if [ $(getent group www-data) ]; then delgroup www-data; addgroup -g 1000 -S www-data; else addgroup -g 1000 -S www-data; fi; adduser -u 1000 -D -S -G www-data www-data; else if [ $(getent group www-data) ]; then delgroup www-data; addgroup -g 1000 -S www-data; else addgroup -g 1000 -S www-data; fi; adduser -u 1000 -D -S -G www-data www-data; fi; \
+#RUN if [ id "82" >/dev/null 2>&1; ]; then deluser --remove-home www-data; if [ $(getent group www-data) ]; then delgroup www-data; addgroup -g 1000 -S www-data; else addgroup -g 1000 -S www-data; fi; adduser -u 1000 -D -S -G www-data www-data; else if [ $(getent group www-data) ]; then delgroup www-data; addgroup -g 1000 -S www-data; else addgroup -g 1000 -S www-data; fi; adduser -u 1000 -D -S -G www-data www-data; fi; \
+
+
+
+
+
+
+
+
+RUN if getent passwd www-data >/dev/null; then current_uid=$(id -u www-data); if [ "$current_uid" -eq 82 ]; then deluser --remove-home www-data; fi; if getent group www-data >/dev/null; then delgroup www-data; fi; fi; addgroup -g 1000 -S www-data; adduser -u 1000 -D -S -G www-data www-data; \
     \
     # Create the php-fpm log directory
     mkdir -p /var/log/php-fpm; \
@@ -160,7 +169,7 @@ RUN if [ id "82" >/dev/null 2>&1; ]; then deluser --remove-home www-data; if [ $
         php83-pecl-xhprof \
         php83-pecl-xhprof-assets \
         php83-pecl-rdkafka \
-        php83-pecl-maxminddb \
+        ## php83-pecl-maxminddb \
         php83-pecl-igbinary \
         #php83-pecl-grpc \
         #php83-pecl-swoole \
@@ -172,7 +181,7 @@ RUN if [ id "82" >/dev/null 2>&1; ]; then deluser --remove-home www-data; if [ $
         php83-pecl-redis \
         php83-pecl-smbclient \
         php83-pecl-uploadprogress-doc \
-        php83-pecl-couchbase \
+        #php83-pecl-couchbase \
         php83-pecl-luasandbox \
         php83-pecl-mailparse \
         php83-pecl-memcache \
@@ -182,6 +191,7 @@ RUN if [ id "82" >/dev/null 2>&1; ]; then deluser --remove-home www-data; if [ $
         php83-pecl-brotli \
         php83-pecl-mongodb \
 	 ; \
+    ls -al /var/lib/ && \
     rm -rf /var/lib/apt/lists/*
 
 # Install extensions
@@ -200,10 +210,10 @@ RUN curl -sSL https://github.com/mlocati/docker-php-extension-installer/releases
     # jsonpath \
     lz4 \
     # lzf \
-    maxminddb \
+    ## maxminddb \
     odbc \
     opentelemetry \
-    pkcs11 \
+    ## pkcs11 \
     # protobuf \
     # raphf \
     # rdkafka \

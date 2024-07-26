@@ -16,6 +16,12 @@ if [ -f env.hcl ]; then
     export $(cat env.hcl | xargs)
 fi
 
+DOCKERCMD='docker run -it -d --rm -p 9000:9000 --name myphpfpm technoboggle/php-fpm-alpine:'"${PHP_VERSION//\"/}-${ALPINE_VERSION//\"/}"
+
+sed -i.bu -E 's#DOCKERCMD=".*"#DOCKERCMD="'"${DOCKERCMD//\"/}"'"#g' env.hcl
+
+export DOCKERCMD
+
 if [ -f .perms ]; then
     export $(cat .perms | xargs)
 fi
@@ -39,21 +45,57 @@ chmod 0777 build_now.sh
 chmod 0777 hooks/build
 chmod 0777 docker-php-entrypoint
 
+output=$(docker buildx ls | grep -v '^ ')
+result=$(echo "$output" | awk '{print $1}' | grep -E '^\S+\*($|\s\*)' | head -n 1)
+current_builder=$(echo "$result" | sed 's/[ *]*$//')
+echo "Current builder is: ${current_builder}."
+
 docker login -u="${DOCKER_USER}" -p="${DOCKER_PAT}"
 
-current_builder=$(docker buildx ls | grep -i '\s\*' | head -n1 | awk '{print $1;}')
-echo "Current builder is: ${current_builder}, switching to technoboggle_builder."
+# Values to match against
+match_values="false FALSE N n"
 
-# The following would be for a local builder
-docker buildx create --name technoboggle_builder --use --bootstrap
-docker buildx bake -f docker-bake.hcl -f env.hcl --builder technoboggle_builder --no-cache --push
-#--platform=linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/arm64,linux/amd64,linux/386,linux/armhf,linux/s390x,linux/ppc64le
+# Remove any double quotes from BUILD_LOCALLY
+BUILD_LOCALLY=$(echo "$BUILD_LOCALLY" | tr -d '"')
 
-# The following would be for a remote builder
-#docker buildx create --driver cloud technoboggle/test
-#docker buildx bake -f docker-bake.hcl -f env.hcl --builder cloud-technoboggle-builder --no-cache --push
+# Function to check if a variable is in a list
+value_in_list() {
+    local value=$1
+    local list=$2
+    for item in $list; do
+        if [ "$item" = "$value" ]; then
+            return 0 # found
+        fi
+    done
+    return 1 # not found
+}
 
-docker run -it -d --rm -p 9000:9000 --name myphpfpm technoboggle/php-fpm-alpine:"${PHP_VERSION}-${ALPINE_VERSION}"
+# Check BUILD_LOCALLY and run appropriate code
+if [ -z "$BUILD_LOCALLY" ] || value_in_list "$BUILD_LOCALLY" "$match_values"; then
+    # echo "BUILD_LOCALLY is unset, empty, or matches a value in the match list"
+    echo "Building remotely"
+    docker buildx create --driver cloud technoboggle/production
+    docker buildx use cloud-technoboggle-production
+else
+    # echo "BUILD_LOCALLY does not match any values in the match list"
+    echo "Building locally"
+    docker buildx create --name technoboggle_builder --use --bootstrap
+    docker buildx use "technoboggle_builder"
+fi
+
+docker buildx bake -f env.hcl  -f docker-bake.hcl --no-cache --push
+
+sed -i.bu -E 's/BUILD_DATE=".*"/BUILD_DATE=""/g' env.hcl
+sed -i.bu -E 's/VCS_REF=".*"/VCS_REF=""/g' env.hcl
+sed -i.bu -E 's/DOCKERCMD=".*"/DOCKERCMD=""/g' env.hcl
+
+rm -f env.hcl.bu
+
+echo "Running the container, using the following command:"
+echo "  ${DOCKERCMD}"
+echo
+eval $DOCKERCMD
+
 docker container stop -t 10 myphpfpm
 
 echo "Switching back to builder: ${current_builder}"

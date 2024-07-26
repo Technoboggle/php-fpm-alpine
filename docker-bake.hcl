@@ -21,13 +21,14 @@ target "app" {
         DESCRIPTION = "${DESCRIPTION}"
         URL = "${URL}"
         VCS_URL = "${VCS_URL}"
+        BUILD_LOCALLY = "${BUILD_LOCALLY}"
         VENDOR = "${VENDOR}"
         BUILDVERSION = "${BUILD_VERSION}"
         BUILD_DATE="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
     }
     #platforms = ["linux/amd64", "linux/arm64"]
     # platforms = ["linux/amd64", "linux/arm/v6", "linux/arm/v7", "linux/arm64/v8", "linux/arm64", "linux/armhf", "linux/386", "linux/ppc64le"]
-    platforms = ["linux/arm/v6","linux/arm/v7","linux/arm64/v8","linux/arm64","linux/amd64","linux/386","linux/armhf","linux/s390x","linux/ppc64le"]
+    platforms = ["linux/arm/v6","linux/arm/v7","linux/arm64/v8","linux/amd64","linux/386","linux/s390x","linux/ppc64le"]
     push = true
     cache = false
     progress = "plain"

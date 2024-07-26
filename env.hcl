@@ -1,5 +1,5 @@
-ALPINE_VERSION=3.19
-PHP_VERSION=8.3
+ALPINE_VERSION="3.20"
+PHP_VERSION="8.3"
 MAINTAINER="edward.finlayson@btinternet.com"
 AUTHORNAME="Edward Finlayson"
 AUTHORS="edward.finlayson@btinternet.com"
@@ -15,6 +15,7 @@ NAME="Technoboggle/phpmyadmin-alpine"
 DESCRIPTION="Technoboggle lightweight PhpMyAdmin node"
 URL="http://technoboggle.com/"
 VCS_URL="https://github.com/technoboggle/phpmyadmin-alpine"
+BUILD_LOCALLY="true"
 VENDOR="WSO2"
 BUILD_VERSION="0.1"
 BUILD_DATE=""
